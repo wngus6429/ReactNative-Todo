@@ -1,0 +1,185 @@
+import React from "react";
+import { StyleSheet, Text, View, StatusBar, TextInput, Dimensions, Platform, ScrollView } from "react-native";
+import { AppLoading } from "expo";
+import ToDo from "./ToDo";
+import "react-native-get-random-values";
+import { v4 as uuidv4 } from "uuid";
+const seed = () => {
+  const one = Math.floor((Math.random() * 100) / 3.92);
+  const two = Math.floor((Math.random() * 100) / 3.92);
+  const three = Math.floor((Math.random() * 100) / 3.92);
+  const four = Math.floor((Math.random() * 100) / 3.92);
+  const five = Math.floor((Math.random() * 100) / 3.92);
+  const six = Math.floor((Math.random() * 100) / 3.92);
+  const seven = Math.floor((Math.random() * 100) / 3.92);
+  const eight = Math.floor((Math.random() * 100) / 3.92);
+  const nine = Math.floor((Math.random() * 100) / 3.92);
+  const ten = Math.floor((Math.random() * 100) / 3.92);
+  const eleven = Math.floor((Math.random() * 100) / 3.92);
+  const twelve = Math.floor((Math.random() * 100) / 3.92);
+  const thirteen = Math.floor((Math.random() * 100) / 3.92);
+  const fourteen = Math.floor((Math.random() * 100) / 3.92);
+  const fifteen = Math.floor((Math.random() * 100) / 3.92);
+  const sixteen = Math.floor((Math.random() * 100) / 3.92);
+  return [
+    one,
+    two,
+    three,
+    four,
+    five,
+    six,
+    seven,
+    eight,
+    nine,
+    ten,
+    eleven,
+    twelve,
+    thirteen,
+    fourteen,
+    fifteen,
+    sixteen,
+  ];
+};
+
+const { height, width } = Dimensions.get("window");
+
+export default class App extends React.Component {
+  state = {
+    newToDo: "",
+    loadedToDos: false,
+    toDos: {},
+  };
+  componentDidMount = () => {
+    this._loadToDos();
+  };
+  render() {
+    const { newToDo, loadedToDos, toDos } = this.state;
+    //console.log(toDos); //안에 데이터가 들어있음. 몇줄;
+    if (!loadedToDos) {
+      return <AppLoading />;
+    }
+    return (
+      <View style={styles.container}>
+        <StatusBar barStyle="light-content" />
+        <Text style={styles.title}>Kawai To Do</Text>
+        <View style={styles.card}>
+          <TextInput
+            style={styles.input}
+            placeholder={"New To Do"}
+            value={newToDo}
+            onChangeText={this._controlNewToDo} //플레이스홀더에 있는 내용을 바꿈
+            placeholderTextColor={"#999"}
+            returnKeyType={"done"} //원래 키보드 오른쪽 밑에 키를 done으로 바꿈.
+            autoCorrect={false} //자동수정 기능 꺼버림.
+            onSubmitEditing={this._addToDo} //리스트 추가기능
+          />
+          <ScrollView contentContainerStyle={styles.toDos}>
+            {Object.values(toDos).map((toDo) => (
+              <ToDo
+                key={toDo.id}
+                deleteToDo={this._deleteToDo}
+                uncompleteToDo={this._uncompleteToDo}
+                completeToDo={this._completeToDo}
+                updateToDo={this._updateToDo}
+                {...toDo}
+              />
+            ))}
+          </ScrollView>
+        </View>
+      </View>
+    );
+  }
+  _controlNewToDo = (text) => {
+    this.setState({ newToDo: Text });
+  };
+  //이건 이벤트에서 텍스트를 가져온다.
+  _loadToDos = () => {
+    this.setState({ loadedToDos: true });
+  };
+  _addToDo = () => {
+    const { newToDo } = this.state;
+    if (newToDo !== "") {
+      //newTodo가 비어있지 않다면 뭔가 해야지?
+      this.setState((prevState) => {
+        const ID = uuidv4({ random: seed() });
+        const newToDoObject = { [ID]: { id: ID, isCompleted: false, text: newToDo, createAt: Date.now() } };
+        const newState = { ...prevState, newToDo: "", toDos: { ...prevState.toDos, ...newToDoObject } }; //여기에 이전 state를 패스할거임.
+        return { ...newState };
+      });
+    }
+  };
+  _deleteToDo = (id) => {
+    this.setState((prevState) => {
+      const toDos = prevState.toDos;
+      delete toDos[id];
+      const newState = {
+        ...prevState,
+        ...toDos,
+      };
+      return { ...newState };
+    });
+    _uncompleteToDo = (id) => {
+      this.setState((prevState) => {
+        const newState = {
+          ...prevState,
+          toDos: { ...prevState.toDos, [id]: { ...prevState.toDos[id], isCompleted: false } },
+        };
+        return { ...newState };
+      });
+    };
+    _completeToDo = (id) => {
+      this.setState((prevState) => {
+        const newState = {
+          ...prevState,
+          toDos: { ...prevState.toDos, [id]: { ...prevState.toDos[id], isCompleted: true } },
+        };
+        return { ...newState };
+      });
+    };
+    _updateToDo = (id, text) => {
+      this.setState((prevState) => {
+        const newState = {
+          ...prevState,
+          toDos: { ...prevState.toDos, [id]: { ...prevState.toDos[id], text: true } },
+        };
+        return { ...newState };
+      });
+    };
+  };
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#F23657",
+    alignItems: "center",
+    //justifyContent: "center", 이걸 지워서 맨위로 글짜
+  },
+  title: {
+    color: "white",
+    fontSize: 30,
+    marginTop: 50,
+    fontWeight: "200",
+    marginBottom: 20,
+  },
+  card: {
+    backgroundColor: "white",
+    flex: 1,
+    width: width - 25, //맨 위에 const 쪽 활용
+    borderTopLeftRadius: 10, //위쪽만 굴곡 주고 싶어서
+    borderTopRightRadius: 10, //위쪽만 굴곡 주고 싶어서
+    ...Platform.select({
+      android: { elevation: 3 },
+    }),
+    //elevation: 5, //숫자가 커질수록 그림자가 커짐.
+  },
+  input: {
+    padding: 20, //내부 회색 글자 위치조정
+    borderBottomColor: "#bbb",
+    borderBottomWidth: 1, //이걸로 밑에 선이 생긴다
+    fontSize: 25,
+  },
+  toDos: {
+    alignItems: "center",
+  },
+});
